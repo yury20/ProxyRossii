@@ -1,0 +1,21 @@
+## Intellij IDEA ##
+.idea/
+*.iml
+/out/
+*.log
+*.log.*
+
+## Java ##
+*.class
+
+## Maven ##
+/target
+
+## Archives ##
+*.jar
+*.war
+*.ear
+*.tar
+*.gz
+*.zip
+*.rar
