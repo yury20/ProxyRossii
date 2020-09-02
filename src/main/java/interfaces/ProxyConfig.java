@@ -6,6 +6,4 @@ public interface ProxyConfig {
     String getRemoteHost();
     int getRemotePort();
     int getDelay();
-    int getWorkerCount();
-    void setWorkerCount(int workerCount);
 }

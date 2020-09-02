@@ -1,2 +1,2 @@
 # ProxyRossii
-Simple TCP proxy with delayed response
+Simple TCP proxy with delayed response (under construction!)

@@ -42,20 +42,14 @@ public class ProxyConfigList extends ArrayList<ProxyConfig> {
         private String remoteHost;
         private int remotePort;
         private int delay;
-        private int workerCount;
 
         public Config(String configName, int localPort, String remoteHost, int remotePort, int delay) {
-            this(configName, localPort, remoteHost, remotePort, delay, 0);
-        }
-
-        public Config(String configName, int localPort, String remoteHost, int remotePort, int delay, int workerCount) {
             this.configName = configName;
             this.localPort = localPort;
             this.remoteHost = remoteHost;
             this.remotePort = remotePort;
             this.delay = delay;
-            this.workerCount = workerCount;
-            LOGGER.info(String.format("Config \"%s\" was successfully created: localPort=%d, remoteHost=%s, remotePort=%d, delay=%d, workerCount=%d", configName, localPort, remoteHost, remotePort, delay, workerCount));
+            LOGGER.info(String.format("Config \"%s\" was successfully created: localPort=%d, remoteHost=%s, remotePort=%d, delay=%d", configName, localPort, remoteHost, remotePort, delay));
         }
 
         @Override
@@ -81,16 +75,6 @@ public class ProxyConfigList extends ArrayList<ProxyConfig> {
         @Override
         public int getDelay() {
             return delay;
-        }
-
-        @Override
-        public int getWorkerCount() {
-            return workerCount;
-        }
-
-        @Override
-        public void setWorkerCount(int workerCount) {
-            this.workerCount = workerCount;
         }
     }
 }

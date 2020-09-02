@@ -3,6 +3,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+// TODO Убрать русский текст из логов
+// TODO Убрать лишний дебаг из логов (оставить info)
+// TODO Написать README
 
 public class ApplicationMain {
 
@@ -21,17 +24,10 @@ public class ApplicationMain {
             return;
         }
 
-        LOGGER.info("Proxy is starting with " + configs.size() + " connectors");
-        int cores = Runtime.getRuntime().availableProcessors();
-        LOGGER.info("Proxy detected " + cores + " core" + (cores > 1 ? "s" : ""));
-        int workerCount = Math.max(cores / configs.size(), 1);
-        LOGGER.info("Proxy will use " + workerCount + " workers per connector");
-
         for (ProxyConfig config : configs) {
-            config.setWorkerCount(workerCount);
-            new Proxy(config).start();
+            new Thread(new ProxyServer(config), "Thread-" + config.getName()).start();
         }
 
-        LOGGER.info("Proxy started!");
+        LOGGER.info(" >>>>>>>>>>>>>> Proxy Rossii started! <<<<<<<<<<<<<<<");
     }
 }
