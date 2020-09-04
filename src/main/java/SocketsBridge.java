@@ -1,11 +1,13 @@
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -29,28 +31,25 @@ public class SocketsBridge implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.debug("SocketsBridge {}:{} --> {}:{} is starting...", in.getInetAddress().getHostName(), in.getPort(), out.getInetAddress().getHostName(), out.getPort());
+        String bridgeType = String.format("%s:%d --> %s:%d", in.getInetAddress().getHostName(), in.getPort(), out.getInetAddress().getHostName(), out.getPort());
+        LOGGER.debug("SocketsBridge {} is starting...", bridgeType);
         try (InputStream inputStream = in.getInputStream(); OutputStream outputStream = out.getOutputStream()) {
             if (inputStream == null || outputStream == null)
                 return;
 
-            byte[] data = new byte[1024];
             int bytesRead;
-            int totalBytesRead = 0;
-            while ((bytesRead = inputStream.read(data)) != -1) {
-                byte[] dataCopy = Arrays.copyOf(data, bytesRead);
-                scheduledPool.schedule(new ScheduledResponse(outputStream, dataCopy), delay, TimeUnit.MILLISECONDS);
-                totalBytesRead += bytesRead;
-                LOGGER.debug("Прочитано и записано " + bytesRead + " байт");
-                LOGGER.debug("Содержимое ответа: " + new String(dataCopy, StandardCharsets.UTF_8));
+            byte[] buffer = new byte[131072];
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                LOGGER.debug("............................... {}: прочитано {} байт", bridgeType, bytesRead);
+                if(bytesRead > 0)
+                    scheduledPool.schedule(new ScheduledResponse(outputStream, Arrays.copyOf(buffer, bytesRead)), delay, TimeUnit.MILLISECONDS);
+//                    LOGGER.debug("Содержимое потока " + bridgeType + ": " + new String(allData, StandardCharsets.UTF_8));
             }
-            LOGGER.debug("Переданы данные размером " + totalBytesRead + " байт");
         } catch (SocketException ignored) {
         } catch (Exception exception) {
-            LOGGER.error("Some exception happened during executing SocketsBridge {}:{} --> {}:{}",
-                    in.getInetAddress().getHostName(), in.getPort(), out.getInetAddress().getHostName(), out.getPort(), exception);
+            LOGGER.error("Some exception happened during executing SocketsBridge {}", bridgeType, exception);
         }
-        LOGGER.debug("SocketsBridge {}:{} --> {}:{} was finished.", in.getInetAddress().getHostName(), in.getPort(), out.getInetAddress().getHostName(), out.getPort());
+        LOGGER.debug("SocketsBridge {} was finished.", bridgeType);
     }
 
     private class ScheduledResponse implements Runnable {

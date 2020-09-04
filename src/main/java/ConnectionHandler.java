@@ -38,8 +38,8 @@ public class ConnectionHandler implements Runnable {
         }
 
         LOGGER.debug("Established proxy connection: {}:{} <-> {}:{}", clientHost, clientPort, remoteServerHost, remoteServerPort);
-        pool.execute(new SocketsBridge(clientSocket, serverSocket, 0));
-        pool.execute(new SocketsBridge(serverSocket, clientSocket, config.getDelay()));
+        pool.execute(new SocketsBridge(clientSocket, serverSocket, config.getDelay()));
+        pool.execute(new SocketsBridge(serverSocket, clientSocket, 0));
         pool.execute(() -> {
             while (true) {
                 if (clientSocket.isClosed()) {
