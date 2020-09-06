@@ -2,10 +2,9 @@ import interfaces.ProxyConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-// TODO Убрать русский текст из логов
-// TODO Убрать лишний дебаг из логов (оставить info)
-// TODO Написать README
+import java.io.InputStream;
 
 public class ApplicationMain {
 
@@ -15,19 +14,23 @@ public class ApplicationMain {
 
         ProxyConfigList configs;
         try {
-            if(args.length > 0)
-                configs = new ProxyConfigList(args[0]);
-            else
-                configs = new ProxyConfigList("src/main/resources/proxyR.properties");
+            if(args.length > 0) {
+                LOGGER.info("\n\n\nStart reading the external editable config file!");
+                configs = new ProxyConfigList(new FileInputStream(args[0]));
+            }
+            else {
+                LOGGER.info("\n\n\nStart reading the default config file!");
+                InputStream inputStream = ApplicationMain.class.getClassLoader().getResourceAsStream("proxyR.properties");
+                configs = new ProxyConfigList(inputStream);
+            }
         } catch (IOException e) {
             LOGGER.error(e.toString());
             return;
         }
 
-        for (ProxyConfig config : configs) {
+        for (ProxyConfig config : configs)
             new Thread(new ProxyServer(config), "Thread-" + config.getName()).start();
-        }
 
-        LOGGER.info(" >>>>>>>>>>>>>> Proxy Rossii started! <<<<<<<<<<<<<<<");
+        LOGGER.info(">>>>>>>>>>>>>> Proxy Rossii started! <<<<<<<<<<<<<<<");
     }
 }

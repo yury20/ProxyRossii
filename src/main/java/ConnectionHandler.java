@@ -28,7 +28,7 @@ public class ConnectionHandler implements Runnable {
         int clientPort = clientSocket.getPort();
         String remoteServerHost = config.getRemoteHost();
         int remoteServerPort = config.getRemotePort();
-        LOGGER.debug("New ConnectionHandler started for connection incoming from {}:{}", clientHost, clientPort);
+        LOGGER.debug("New connection handler started for incoming connection from {}:{}", clientHost, clientPort);
 
         try {
             serverSocket = new Socket(remoteServerHost, remoteServerPort);
@@ -41,17 +41,13 @@ public class ConnectionHandler implements Runnable {
         pool.execute(new SocketsBridge(clientSocket, serverSocket, config.getDelay()));
         pool.execute(new SocketsBridge(serverSocket, clientSocket, 0));
         pool.execute(() -> {
-            while (true) {
-                if (clientSocket.isClosed()) {
-                    LOGGER.debug("Client socket {}:{} was closed.", clientHost, clientPort);
-                    closeRemoteServerSocket();
-                    break;
-                }
+            while (!clientSocket.isClosed())
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(50);
                 } catch (InterruptedException ignored) {
                 }
-            }
+            closeRemoteServerSocket();
+            LOGGER.debug("Client socket {}:{} was closed.", clientHost, clientPort);
         });
     }
 
@@ -59,7 +55,9 @@ public class ConnectionHandler implements Runnable {
         if (serverSocket != null && !serverSocket.isClosed()) {
             try {
                 LOGGER.debug("Closing socket to remote server {}:{}", config.getRemoteHost(), config.getRemotePort());
+                Thread.sleep(config.getDelay());
                 serverSocket.close();
+            } catch (InterruptedException ignored) {
             } catch (IOException exeption) {
                 LOGGER.error("Can't close the remote server socket!", exeption);
             }

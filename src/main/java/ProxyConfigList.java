@@ -2,18 +2,18 @@ import interfaces.ProxyConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 public class ProxyConfigList extends ArrayList<ProxyConfig> {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigList.class);
 
-    public ProxyConfigList(String propsFileName) throws IOException {
+    public ProxyConfigList(InputStream propFile) throws IOException {
 
         Properties properties = new Properties();
-        properties.load(new FileInputStream(propsFileName));
+        properties.load(propFile);
 
         Set<String> proxyNames = new HashSet<>();
         Set<String> props = properties.stringPropertyNames();
@@ -43,7 +43,7 @@ public class ProxyConfigList extends ArrayList<ProxyConfig> {
         private int remotePort;
         private int delay;
 
-        public Config(String configName, int localPort, String remoteHost, int remotePort, int delay) {
+        private Config(String configName, int localPort, String remoteHost, int remotePort, int delay) {
             this.configName = configName;
             this.localPort = localPort;
             this.remoteHost = remoteHost;
