@@ -22,34 +22,52 @@ public class SocketsBridge implements Runnable {
     private final Socket in;
     private final Socket out;
     private final int delay;
+    private final String proxyName;
 
-    public SocketsBridge(Socket in, Socket out, int delay) {
+    public SocketsBridge(Socket in, Socket out, int delay, String proxyName) {
         this.in = in;
         this.out = out;
         this.delay = delay;
+        this.proxyName = proxyName;
     }
 
     @Override
     public void run() {
         String bridgeName = String.format("%s:%d --> %s:%d", in.getInetAddress().getHostName(), in.getPort(), out.getInetAddress().getHostName(), out.getPort());
-        LOGGER.debug("SocketsBridge {} is starting...", bridgeName);
-        try (InputStream inputStream = in.getInputStream(); OutputStream outputStream = out.getOutputStream()) {
+        LOGGER.debug("{} SocketsBridge {} is starting...", proxyName, bridgeName);
+        try {
+            InputStream inputStream = in.getInputStream();
+            OutputStream outputStream = out.getOutputStream();
             if (inputStream == null || outputStream == null)
                 return;
 
             int bytesRead;
             byte[] buffer = new byte[131072];
             while ((bytesRead = inputStream.read(buffer)) != -1) {
-                LOGGER.debug(".................................... {}: transferring {} bytes", bridgeName, bytesRead);
-                if(bytesRead > 0)
-                    scheduledPool.schedule(new ScheduledResponse(outputStream, Arrays.copyOf(buffer, bytesRead)), delay, TimeUnit.MILLISECONDS);
+                if (bytesRead > 0) {
+//                    LOGGER.debug(".................................... {}: transferring {} bytes", bridgeName, bytesRead);
+                    if (delay > 0)
+                        scheduledPool.schedule(new ScheduledResponse(outputStream, Arrays.copyOf(buffer, bytesRead)), delay, TimeUnit.MILLISECONDS);
+                    else {
+                        outputStream.write(buffer, 0, bytesRead);
+                        outputStream.flush();
+                    }
+                }
             }
-            Thread.sleep(delay);
         } catch (SocketException ignored) {
         } catch (Exception exception) {
-            LOGGER.error("Some exception happened during executing SocketsBridge {}", bridgeName, exception);
+            LOGGER.error("Some exception happened during executing {} SocketsBridge {}", proxyName, bridgeName, exception);
         }
-        LOGGER.debug("SocketsBridge {} was finished.", bridgeName);
+        if(delay > 0)
+            try {
+                Thread.sleep(delay);
+                in.close();
+                out.close();
+            } catch (InterruptedException ignored) {
+            } catch (IOException exception) {
+                LOGGER.error("Exception while closing out socket for {} SocketsBridge {}", proxyName, bridgeName, exception);
+            }
+        LOGGER.debug("{} SocketsBridge {} was finished.", proxyName, bridgeName);
     }
 
     private class ScheduledResponse implements Runnable {
@@ -68,7 +86,7 @@ public class SocketsBridge implements Runnable {
                 outputStream.write(data);
                 outputStream.flush();
             } catch (IOException exception) {
-                LOGGER.error("Can't write data to OutputStream for {}:{}!", out.getInetAddress().getHostName(), out.getPort(), exception);
+                LOGGER.error("Can't write data to {} OutputStream for {}:{}!", proxyName, out.getInetAddress().getHostName(), out.getPort(), exception);
             }
         }
     }

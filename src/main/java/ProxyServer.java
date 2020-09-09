@@ -24,17 +24,16 @@ public class ProxyServer implements Runnable {
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(config.getLocalPort())) { // default 50 connections max in backlog
             LOGGER.info("Server \"" + config.getName() + "\" successfully started!");
-            while(Thread.currentThread().isAlive()) {
+            while(true)
                 try {
                     Socket clientSocket = serverSocket.accept();
+                    clientSocket.setSoTimeout(0);
                     LOGGER.debug("Server " + config.getName() + " accepted incoming connection!");
                     pool.execute(new ConnectionHandler(clientSocket, config, pool));
                 } catch (IOException exception) {
                     pool.shutdown();
                     LOGGER.error("Caught an exception during executing " + config.getLocalPort() + " for server " + config.getName(), exception);
                 }
-            }
-            LOGGER.info("Server \"" + config.getName() + "\" stopped!");
         } catch (IOException | IllegalArgumentException exeption) {
             LOGGER.error("Can't create socket on port " + config.getLocalPort() + " for server " + config.getName(), exeption);
         }

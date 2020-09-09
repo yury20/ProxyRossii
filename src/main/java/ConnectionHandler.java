@@ -28,26 +28,26 @@ public class ConnectionHandler implements Runnable {
         int clientPort = clientSocket.getPort();
         String remoteServerHost = config.getRemoteHost();
         int remoteServerPort = config.getRemotePort();
-        LOGGER.debug("New connection handler started for incoming connection from {}:{}", clientHost, clientPort);
+        LOGGER.debug("Server {} starting new connection handler for incoming connection from {}:{}", config.getName(), clientHost, clientPort);
 
         try {
             serverSocket = new Socket(remoteServerHost, remoteServerPort);
         } catch (IOException exception) {
-            LOGGER.error("Failed creating socket to {}:{}", remoteServerHost, remoteServerPort, exception);
+            LOGGER.error("Server {} failed creating socket to {}:{}", config.getName(), remoteServerHost, remoteServerPort, exception);
             return;
         }
 
-        LOGGER.debug("Established proxy connection: {}:{} <-> {}:{}", clientHost, clientPort, remoteServerHost, remoteServerPort);
-        pool.execute(new SocketsBridge(clientSocket, serverSocket, config.getDelay()));
-        pool.execute(new SocketsBridge(serverSocket, clientSocket, 0));
+        LOGGER.debug("Server {} established proxy connection: {}:{} <-> {}:{}", config.getName(), clientHost, clientPort, remoteServerHost, remoteServerPort);
+        pool.execute(new SocketsBridge(clientSocket, serverSocket, config.getDelay() / 2, config.getName()));
+        pool.execute(new SocketsBridge(serverSocket, clientSocket, config.getDelay() / 2, config.getName()));
         pool.execute(() -> {
             while (!clientSocket.isClosed())
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(config.getDelay() + 50);
                 } catch (InterruptedException ignored) {
                 }
+            LOGGER.debug("Server {}: client socket {}:{} looks like closed...", config.getName(), clientHost, clientPort);
             closeRemoteServerSocket();
-            LOGGER.debug("Client socket {}:{} was closed.", clientHost, clientPort);
         });
     }
 

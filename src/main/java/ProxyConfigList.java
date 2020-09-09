@@ -2,6 +2,7 @@ import interfaces.ProxyConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -10,10 +11,10 @@ public class ProxyConfigList extends ArrayList<ProxyConfig> {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigList.class);
 
-    public ProxyConfigList(InputStream propFile) throws IOException {
+    public ProxyConfigList(InputStream inputResources) throws IOException {
 
         Properties properties = new Properties();
-        properties.load(propFile);
+        properties.load(inputResources);
 
         Set<String> proxyNames = new HashSet<>();
         Set<String> props = properties.stringPropertyNames();
