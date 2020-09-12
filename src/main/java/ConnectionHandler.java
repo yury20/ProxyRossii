@@ -32,6 +32,7 @@ public class ConnectionHandler implements Runnable {
 
         try {
             serverSocket = new Socket(remoteServerHost, remoteServerPort);
+            serverSocket.setSoTimeout(600000);
         } catch (IOException exception) {
             LOGGER.error("Server {} failed creating socket to {}:{}", config.getName(), remoteServerHost, remoteServerPort, exception);
             return;

@@ -58,15 +58,14 @@ public class SocketsBridge implements Runnable {
         } catch (Exception exception) {
             LOGGER.error("Some exception happened during executing {} SocketsBridge {}", proxyName, bridgeName, exception);
         }
-        if(delay > 0)
-            try {
-                Thread.sleep(delay);
-                in.close();
-                out.close();
-            } catch (InterruptedException ignored) {
-            } catch (IOException exception) {
-                LOGGER.error("Exception while closing out socket for {} SocketsBridge {}", proxyName, bridgeName, exception);
-            }
+        try {
+            Thread.sleep(delay);
+            in.close();
+            out.close();
+        } catch (InterruptedException ignored) {
+        } catch (IOException exception) {
+            LOGGER.error("Exception while closing out socket for {} SocketsBridge {}", proxyName, bridgeName, exception);
+        }
         LOGGER.debug("{} SocketsBridge {} was finished.", proxyName, bridgeName);
     }
 

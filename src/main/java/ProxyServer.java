@@ -27,7 +27,7 @@ public class ProxyServer implements Runnable {
             while(true)
                 try {
                     Socket clientSocket = serverSocket.accept();
-                    clientSocket.setSoTimeout(0);
+                    clientSocket.setSoTimeout(600000);
                     LOGGER.debug("Server " + config.getName() + " accepted incoming connection!");
                     pool.execute(new ConnectionHandler(clientSocket, config, pool));
                 } catch (IOException exception) {
