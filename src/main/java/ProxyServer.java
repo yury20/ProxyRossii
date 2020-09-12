@@ -12,6 +12,8 @@ public class ProxyServer implements Runnable {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(ProxyServer.class);
 
+    private static int incomeConnCounter = 0;
+
     private final ProxyConfig config;
     private final ExecutorService pool;
 
@@ -27,12 +29,11 @@ public class ProxyServer implements Runnable {
             while(true)
                 try {
                     Socket clientSocket = serverSocket.accept();
-                    clientSocket.setSoTimeout(600000);
-                    LOGGER.debug("Server " + config.getName() + " accepted incoming connection!");
+                    LOGGER.debug("Server " + config.getName() + " accepted the {}-th incoming connection!", ++incomeConnCounter);
                     pool.execute(new ConnectionHandler(clientSocket, config, pool));
-                } catch (IOException exception) {
+                } catch (Exception exception) {
                     pool.shutdown();
-                    LOGGER.error("Caught an exception during executing " + config.getLocalPort() + " for server " + config.getName(), exception);
+                    LOGGER.error("Caught some exception while accepting incoming connection on port" + config.getLocalPort() + " for server " + config.getName(), exception);
                 }
         } catch (IOException | IllegalArgumentException exeption) {
             LOGGER.error("Can't create socket on port " + config.getLocalPort() + " for server " + config.getName(), exeption);

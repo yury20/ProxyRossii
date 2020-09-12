@@ -50,7 +50,7 @@ public class ProxyConfigList extends ArrayList<ProxyConfig> {
             this.remoteHost = remoteHost;
             this.remotePort = remotePort;
             this.delay = delay;
-            LOGGER.info(String.format("Config \"%s\" was successfully created: localPort=%d, remoteHost=%s, remotePort=%d, delay=%d", configName, localPort, remoteHost, remotePort, delay));
+            LOGGER.info("Config \"{}\" was successfully created: localPort={}, remoteHost={}, remotePort={}, delay={}", configName, localPort, remoteHost, remotePort, delay);
         }
 
         @Override

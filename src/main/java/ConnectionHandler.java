@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 
 public class ConnectionHandler implements Runnable {
@@ -32,36 +33,13 @@ public class ConnectionHandler implements Runnable {
 
         try {
             serverSocket = new Socket(remoteServerHost, remoteServerPort);
-            serverSocket.setSoTimeout(600000);
         } catch (IOException exception) {
             LOGGER.error("Server {} failed creating socket to {}:{}", config.getName(), remoteServerHost, remoteServerPort, exception);
             return;
         }
 
-        LOGGER.debug("Server {} established proxy connection: {}:{} <-> {}:{}", config.getName(), clientHost, clientPort, remoteServerHost, remoteServerPort);
-        pool.execute(new SocketsBridge(clientSocket, serverSocket, config.getDelay() / 2, config.getName()));
-        pool.execute(new SocketsBridge(serverSocket, clientSocket, config.getDelay() / 2, config.getName()));
-        pool.execute(() -> {
-            while (!clientSocket.isClosed())
-                try {
-                    Thread.sleep(config.getDelay() + 50);
-                } catch (InterruptedException ignored) {
-                }
-            LOGGER.debug("Server {}: client socket {}:{} looks like closed...", config.getName(), clientHost, clientPort);
-            closeRemoteServerSocket();
-        });
-    }
-
-    private void closeRemoteServerSocket() {
-        if (serverSocket != null && !serverSocket.isClosed()) {
-            try {
-                LOGGER.debug("Closing socket to remote server {}:{}", config.getRemoteHost(), config.getRemotePort());
-                Thread.sleep(config.getDelay());
-                serverSocket.close();
-            } catch (InterruptedException ignored) {
-            } catch (IOException exeption) {
-                LOGGER.error("Can't close the remote server socket!", exeption);
-            }
-        }
+        LOGGER.debug("Server {} established proxy connection: {}:{} <<<--->>> {}:{}", config.getName(), clientHost, clientPort, remoteServerHost, remoteServerPort);
+        pool.execute(new SocketsBridge(clientSocket, serverSocket, 0, config.getName()));
+        pool.execute(new SocketsBridge(serverSocket, clientSocket, config.getDelay(), config.getName()));
     }
 }
