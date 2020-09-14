@@ -47,10 +47,11 @@ public class SocketsBridge implements Runnable {
             byte[] buffer = new byte[65536];
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 if (bytesRead > 0) {
-                    LOGGER.trace(".................................... {}: transferring {} bytes", bridgeName, bytesRead);
+                    LOGGER.trace(".................................... {}: reading {} bytes", bridgeName, bytesRead);
                     if (delay > 0)
                         scheduledPool.schedule(new ScheduledResponse(bridgeName, outputStream, Arrays.copyOf(buffer, bytesRead)), delay, TimeUnit.MILLISECONDS);
                     else {
+                        LOGGER.trace(".................................... {}: writing {} bytes", bridgeName, bytesRead);
                         outputStream.write(buffer, 0, bytesRead);
                         outputStream.flush();
                     }
@@ -88,6 +89,7 @@ public class SocketsBridge implements Runnable {
         @Override
         public void run() {
             try {
+                LOGGER.trace(".................................... {}: writing {} bytes", bridgeName, data.length);
                 outputStream.write(data);
                 outputStream.flush();
             } catch (IOException exception) {
