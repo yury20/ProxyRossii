@@ -1,0 +1,9 @@
+# Configs for proxy servers. Delay in ms
+
+8000_goo.localPort = 8000
+8000_goo.remoteHost = google.com
+8000_goo.remotePort = 80
+
+8001_ya.localPort = 8001
+8001_ya.remoteHost = ya.ru
+8001_ya.remotePort = 80

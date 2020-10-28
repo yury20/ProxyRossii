@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"/>
+    <title>Прокси России</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/fonts/font-awesome.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/Navigation-Clean.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/Table-With-Search.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/animate.min.css}"/>
+</head>
+
+<body style="background-color: #98d5e2;">
+
+<div class="container" style="padding: 0px 0px; width: 800px;">
+    <table class="table table-condensed">
+        <tbody class="text-center bg-primary">
+        <tr><th class="text-center"><h1><b>Прокси России<br/><h4>Доставляем пакеты c задержкой</h4></b></h1></th></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="container" align="center">
+    <img class="img-circle" th:src="@{/img/leni_once.gif} "/>
+</div>
+
+<div class="container" style="padding: 20px 0px; width: 800px;">
+    <div class="row ">
+        <div class="table-responsive">
+            <table class="table table-condensed">
+                <tbody class="text-left">
+                <tr th:each="server : ${proxyServerMap}" class="text-left">
+                    <td class="text-nowrap text-left">
+                        <span class="h3" th:text="${server.key}">Сервер</span><br/>
+
+                        <span th:if="${server.value.isRunning()}">
+                            <a class="btn btn-warning" style="margin-top:10px;" role="button" th:href="@{/stopProxyServer(proxyServerName=${server.key})}">Остановить</a><br/>
+                        </span>
+                        <span th:unless="${server.value.isRunning()}">
+                            <a class="btn btn-info" style="margin-top:10px;" role="button" th:href="@{/startProxyServer(proxyServerName=${server.key})}">Запустить</a><br/>
+                        </span>
+
+                        <form action="#" class="form-inline text-left" style="margin-top:10px;" method="post" th:action="@{/setNewDelay}">
+                            <button type="submit" class="btn btn-info">Выставить задержку (ms)</button>
+                            <input hidden="hidden" type="text" name="proxyServerName" th:value="${server.key}"/>
+                            <input required="required" type="number" name="newDelay" th:value="${server.value.getProxyData().getDelay()}" style="width: 100px;"/>
+                        </form>
+
+                        <a class="btn btn-danger" style="margin-top:10px; margin-bottom:50px;" role="button" th:href="@{/deleteProxyServer(proxyServerName=${server.key})}">Удалить конфиг</a><br/>
+
+                    </td>
+                    <td>
+                        <b>Порт прокси-сервера: </b><span th:text="${server.value.getProxyData().getLocalPort()}"></span><br/>
+                        <b>Целевой хост: </b><span th:text="${server.value.getProxyData().getRemoteHost()}"></span><br/>
+                        <b>Целевой порт: </b><span th:text="${server.value.getProxyData().getRemotePort()}"></span><br/><br/>
+                        Блок статистики --- в процессе разработки ---:<br/>
+                        <b>Число полученных tcp-коннектов к прокси: </b><span th:text="${server.value.getProxyData().getTcpConnectCount()}"></span><br/>
+                        <b>Число полученных http-запросов на прокси: </b><span th:text="${server.value.getProxyData().getHttpRequstCount()}"></span><br/>
+                        <b>isRunning: </b><span th:text="${server.value.isRunning()}"></span><br/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead class="text-center bg-primary">
+            <tr><td colspan="3"><h4><b>Создание нового прокси-сервера</b></h4></td></tr>
+            </thead>
+            <tbody class="text-left">
+                <form action="#" class="form-inline text-left" style="margin-top:10px; margin-bottom:10px;" method="post" th:action="@{/addProxyServer}">
+                    <tr>
+                        <td colspan="3" class="text-left"><input required="required" type="text" name="proxyServerName" placeholder="&nbsp;&gt; Уникальное название (латинскими буквами/цифрами, без пробелов). Например, 8007_SUP..." style="width: 773px; margin-right: 10px;"/></td>
+                    </tr>
+                    <tr>
+                        <td class="text-left"><input required="required" type="number" name="localPort" placeholder="&nbsp;&gt; Прокси-порт..." style="width: 200px; margin-right: 10px;"/></td>
+                        <td class="text-left"><input required="required" type="text" name="remoteHost" placeholder="&nbsp;&gt; Целевой хост или ip-адрес..." style="width: 300px; margin-right: 10px;"/></td>
+                        <td class="text-left"><input required="required" type="number" name="remotePort" placeholder="&nbsp;&gt; Целевой порт..." style="width: 200px;"/></td>
+                    </tr>
+                    <tr class="text-center">
+                        <td colspan="3"><button type="submit" class="btn btn-primary">&lt;&lt;&lt;&lt;&lt;&lt;&lt; Создать &gt;&gt;&gt;&gt;&gt;&gt;&gt;</button></td>
+                    </tr>
+                </form>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="container" align="center" style="padding: 0px 0px; width: 800px; margin-top:10px; margin-bottom:10px;">
+    <h6>Evstigneev Yury © Proxy Rossii 2020</h6>
+</div>
+
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/bs-init.js}"></script>
+</body>
+
+</html>
