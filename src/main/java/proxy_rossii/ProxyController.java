@@ -18,7 +18,7 @@ class ProxyController {
     @Getter private final Map<String, ProxyServer> proxyServerMap = new TreeMap<>();
 
     private final String pathToConfigs = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath().replaceFirst("/\\w+\\.jar!/BOOT-INF/classes!", "/proxyR.configs").replace("file:", "");
-    private final File FILE_CONFIGS_FOR_LOAD_AND_SAVING = pathToConfigs.matches(".*/(main|classes)/") ?
+    private final File FILE_CONFIGS_FOR_LOAD_AND_SAVING = pathToConfigs.endsWith("/main/") ?
             getFileFromURL("proxyR.configs") :
             new File(pathToConfigs);
 
