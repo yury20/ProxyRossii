@@ -13,13 +13,13 @@ import java.net.URL;
 import java.util.*;
 
 @Slf4j
-class ProxyController {
+public class ProxyController {
 
     @Getter private final Map<String, ProxyServer> proxyServerMap = new TreeMap<>();
 
     private final String pathToConfigs = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath().replaceFirst("/\\w+\\.jar!/BOOT-INF/classes!", "/proxyR.configs").replace("file:", "");
-    private final File FILE_CONFIGS_FOR_LOAD_AND_SAVING = pathToConfigs.endsWith("/main/") ?
-            getFileFromURL("proxyR.configs") :
+    private final File FILE_CONFIGS_FOR_LOAD_AND_SAVING = pathToConfigs.endsWith("/main/") || pathToConfigs.endsWith("/classes/") ?
+            getFileFromLocalURL() :
             new File(pathToConfigs);
 
     @Getter private Properties properties;
@@ -44,8 +44,8 @@ class ProxyController {
         }
     }
 
-    private File getFileFromURL(String file_configs) {
-        URL url = this.getClass().getClassLoader().getResource(file_configs);
+    private File getFileFromLocalURL() {
+        URL url = this.getClass().getClassLoader().getResource("proxyR.configs");
         File file;
         try {
             file = new File(Objects.requireNonNull(url).toURI());
